@@ -26,12 +26,18 @@ final class Email {
 	/** @var array */
 	private $parameters = [];
 
+	/** @var string */
+	private $from;
+
+	/** @var string */
+	private $name;
+
 	public function __construct(ITemplateFactory $templateFactory, IMailer $mailer, ?string $from, ?string $fromName) {
 		$this->templateFactory = $templateFactory;
 		$this->mailer = $mailer;
 		$this->message = new Message();
 		if ($from) {
-			$this->message->setFrom($from, $fromName);
+			$this->setFrom($from, $fromName);
 		}
 	}
 
@@ -44,7 +50,7 @@ final class Email {
 	}
 
 	public function setFrom(string $from, ?string $name = null) {
-		$this->message->setFrom($from, $name);
+		$this->message->setFrom($this->from = $from, $this->name = $name);
 	}
 
 	public function getMessage(): Message {
@@ -61,6 +67,8 @@ final class Email {
 		/** @var Template $template */
 		$template = $this->templateFactory->createTemplate();
 		$template->setParameters($this->parameters);
+		$template->_name = $this->name;
+		$template->_from = $this->from;
 
 		return (string) $template;
 	}
