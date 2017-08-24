@@ -1,0 +1,14 @@
+{
+	"name": "prolib/emails",
+	"require-dev": {
+		"nette/application": "^3.0",
+		"nette/di": "^3.0",
+		"nette/mail": "^3.0"
+	},
+	"minimum-stability": "alpha",
+	"autoload": {
+		"psr-4": {
+			"ProLib\\Emails\\": ["src/"]
+		}
+	}
+}
