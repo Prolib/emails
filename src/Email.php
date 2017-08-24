@@ -32,13 +32,17 @@ final class Email {
 	/** @var string */
 	private $name;
 
-	public function __construct(ITemplateFactory $templateFactory, IMailer $mailer, ?string $from, ?string $fromName) {
+	/** @var string */
+	private $templateFile;
+
+	public function __construct(ITemplateFactory $templateFactory, IMailer $mailer, string $templateFile, ?string $from, ?string $fromName) {
 		$this->templateFactory = $templateFactory;
 		$this->mailer = $mailer;
 		$this->message = new Message();
 		if ($from) {
 			$this->setFrom($from, $fromName);
 		}
+		$this->templateFile = $templateFile;
 	}
 
 	public function addParameter(string $name, $value): void {
@@ -66,6 +70,7 @@ final class Email {
 	private function getTemplate(): string {
 		/** @var Template $template */
 		$template = $this->templateFactory->createTemplate();
+		$template->setFile($this->templateFile);
 		$template->setParameters($this->parameters);
 		$template->_name = $this->name;
 		$template->_from = $this->from;
