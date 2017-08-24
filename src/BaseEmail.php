@@ -29,12 +29,17 @@ abstract class BaseEmail {
 
 	abstract protected function getTemplateFile(): string;
 
+	protected function startup(Email $email): void {
+
+	}
+
 	public function setDefaultFrom(string $from, $name): void {
 		$this->from = [$from, $name];
 	}
 
 	public function create(): Email {
 		$email = new Email($this->templateFactory, $this->mailer, $this->getTemplateFile(), ...$this->from);
+		$this->startup($email);
 
 		return $email;
 	}
