@@ -1,6 +1,4 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace ProLib\Emails;
 
@@ -8,11 +6,14 @@ use Nette\Application\UI\ITemplateFactory;
 use Nette\Bridges\ApplicationLatte\Template;
 use Nette\Mail\IMailer;
 use Nette\Mail\Message;
+use Nette\SmartObject;
 
 /**
  * @internal
  */
 final class Email {
+
+	use SmartObject;
 
 	/** @var ITemplateFactory */
 	private $templateFactory;
@@ -45,16 +46,28 @@ final class Email {
 		$this->templateFile = $templateFile;
 	}
 
-	public function addParameter(string $name, $value): void {
-		$this->parameters[$name] = $value;
+	public function setSubject(string $subject) {
+		$this->message->setSubject($subject);
+
+		return $this;
 	}
 
-	public function addTo(string $email): void {
+	public function addParameter(string $name, $value) {
+		$this->parameters[$name] = $value;
+
+		return $this;
+	}
+
+	public function addTo(string $email) {
 		$this->message->addTo($email);
+
+		return $this;
 	}
 
 	public function setFrom(string $from, ?string $name = null) {
 		$this->message->setFrom($this->from = $from, $this->name = $name);
+
+		return $this;
 	}
 
 	public function getMessage(): Message {

@@ -4,36 +4,38 @@ namespace ProLib\Emails;
 
 use Nette\Application\UI\ITemplateFactory;
 use Nette\Mail\IMailer;
+use Nette\SmartObject;
 
 abstract class BaseEmailFactory {
+
+	use SmartObject;
 
 	/** @var ITemplateFactory */
 	private $templateFactory;
 
 	/** @var array */
-	private $from = [null, null];
+	private $sender = [null, null];
 
 	/** @var IMailer */
 	private $mailer;
 
-	public function injectComponents(ITemplateFactory $templateFactory, IMailer $mailer) {
+	/**
+	 * @internal
+	 */
+	final public function injectComponents(ITemplateFactory $templateFactory, IMailer $mailer) {
 		$this->templateFactory = $templateFactory;
 		$this->mailer = $mailer;
 	}
 
 	/**
 	 * @internal
-	 * @param string $from
-	 * @param string|null $name
 	 */
-	public function setDefaultFrom(string $from, ?string $name): void {
-		$this->from = [$from, $name];
+	public function setSender(string $from, ?string $name = null): void {
+		$this->sender = [$from, $name];
 	}
 
 	protected function create(string $templateFile): Email {
-		$email = new Email($this->templateFactory, $this->mailer, $templateFile, ...$this->from);
-
-		return $email;
+		return new Email($this->templateFactory, $this->mailer, $templateFile, ...$this->sender);
 	}
 
 }
