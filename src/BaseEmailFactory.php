@@ -6,36 +6,34 @@ use Nette\Application\UI\ITemplateFactory;
 use Nette\Mail\IMailer;
 use Nette\SmartObject;
 
-abstract class BaseEmailFactory {
+abstract class BaseEmailFactory
+{
 
 	use SmartObject;
 
-	/** @var ITemplateFactory */
-	private $templateFactory;
+	private ITemplateFactory $templateFactory;
 
-	/** @var array */
-	private $sender = [null, null];
+	private IMailer $mailer;
 
-	/** @var IMailer */
-	private $mailer;
+	private EmailSenders $emailSenders;
 
 	/**
 	 * @internal
 	 */
-	final public function injectComponents(ITemplateFactory $templateFactory, IMailer $mailer) {
+	final public function injectComponents(
+		ITemplateFactory $templateFactory,
+		IMailer $mailer,
+		EmailSenders $emailSenders
+	)
+	{
 		$this->templateFactory = $templateFactory;
 		$this->mailer = $mailer;
+		$this->emailSenders = $emailSenders;
 	}
 
-	/**
-	 * @internal
-	 */
-	public function setSender(string $from, ?string $name = null): void {
-		$this->sender = [$from, $name];
-	}
-
-	protected function create(string $templateFile): Email {
-		return new Email($this->templateFactory, $this->mailer, $templateFile, ...$this->sender);
+	protected function create(string $templateFile, ?string $templateClass = null): Email
+	{
+		return new Email($this->templateFactory, $this->mailer, $templateFile, $templateClass, $this->emailSenders);
 	}
 
 }

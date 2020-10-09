@@ -1,4 +1,4 @@
-<?php declare(strict_types=1);
+<?php declare(strict_types = 1);
 
 namespace ProLib\Emails;
 
@@ -8,85 +8,101 @@ use Nette\Mail\IMailer;
 use Nette\Mail\Message;
 use Nette\SmartObject;
 
-/**
- * @internal
- */
-final class Email {
+final class Email
+{
 
 	use SmartObject;
 
-	/** @var ITemplateFactory */
-	private $templateFactory;
+	private ITemplateFactory $templateFactory;
 
-	/** @var IMailer */
-	private $mailer;
+	private IMailer $mailer;
 
-	/** @var Message */
-	private $message;
+	private Message $message;
 
-	/** @var array */
-	private $parameters = [];
+	private EmailSenders $emailSenders;
 
-	/** @var string */
-	private $from;
+	/** @var mixed[] */
+	private array $parameters = [];
 
-	/** @var string */
-	private $name;
+	private string $templateFile;
 
-	/** @var string */
-	private $templateFile;
+	private ?string $templateClass;
 
-	public function __construct(ITemplateFactory $templateFactory, IMailer $mailer, string $templateFile, ?string $from, ?string $fromName) {
+	public function __construct(
+		ITemplateFactory $templateFactory,
+		IMailer $mailer,
+		string $templateFile,
+		?string $templateClass,
+		EmailSenders $emailSenders
+	)
+	{
 		$this->templateFactory = $templateFactory;
 		$this->mailer = $mailer;
 		$this->message = new Message();
-		if ($from) {
-			$this->setFrom($from, $fromName);
-		}
+		$this->emailSenders = $emailSenders;
 		$this->templateFile = $templateFile;
+		$this->templateClass = $templateClass;
+
+		if ($this->emailSenders->hasSender()) {
+			$this->setModule(EmailSenders::DEFAULT_MODULE);
+		}
 	}
 
-	public function setSubject(string $subject) {
+	public function setModule(string $module): self
+	{
+		$sender = $this->emailSenders->getSender($module);
+
+		$this->message->setFrom($sender->getEmail(), $sender->getName());
+
+		return $this;
+	}
+
+	public function setSubject(string $subject): self
+	{
 		$this->message->setSubject($subject);
 
 		return $this;
 	}
 
-	public function addParameter(string $name, $value) {
+	public function setParameters(array $parameters): self
+	{
+		$this->parameters = $parameters;
+
+		return $this;
+	}
+
+	public function addParameter(string $name, $value): self
+	{
 		$this->parameters[$name] = $value;
 
 		return $this;
 	}
 
-	public function addTo(string $email) {
+	public function addTo(string $email): self
+	{
 		$this->message->addTo($email);
 
 		return $this;
 	}
 
-	public function setFrom(string $from, ?string $name = null) {
-		$this->message->setFrom($this->from = $from, $this->name = $name);
-
-		return $this;
-	}
-
-	public function getMessage(): Message {
+	public function getMessage(): Message
+	{
 		return $this->message;
 	}
 
-	public function send(): void {
+	public function send(): void
+	{
 		$this->message->setHtmlBody($this->getTemplate());
 
 		$this->mailer->send($this->message);
 	}
 
-	private function getTemplate(): string {
+	private function getTemplate(): string
+	{
 		/** @var Template $template */
-		$template = $this->templateFactory->createTemplate();
+		$template = $this->templateFactory->createTemplate(null, $this->templateClass);
 		$template->setFile($this->templateFile);
 		$template->setParameters($this->parameters);
-		$template->_name = $this->name;
-		$template->_from = $this->from;
 
 		return (string) $template;
 	}
