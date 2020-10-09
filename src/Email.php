@@ -27,6 +27,8 @@ final class Email
 	private string $templateFile;
 
 	private ?string $templateClass;
+	
+	private ?string $basePath;
 
 	public function __construct(
 		ITemplateFactory $templateFactory,
@@ -90,9 +92,16 @@ final class Email
 		return $this->message;
 	}
 
+	public function setBasePath(?string $basePath): self
+	{
+		$this->basePath = $basePath;
+		
+		return $this;
+	}
+
 	public function send(): void
 	{
-		$this->message->setHtmlBody($this->getTemplate());
+		$this->message->setHtmlBody($this->getTemplate(), $this->basePath);
 
 		$this->mailer->send($this->message);
 	}
