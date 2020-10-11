@@ -27,7 +27,7 @@ final class Email
 	private string $templateFile;
 
 	private ?string $templateClass;
-	
+
 	private ?string $basePath;
 
 	public function __construct(
@@ -95,7 +95,7 @@ final class Email
 	public function setBasePath(?string $basePath): self
 	{
 		$this->basePath = $basePath;
-		
+
 		return $this;
 	}
 
@@ -110,10 +110,8 @@ final class Email
 	{
 		/** @var Template $template */
 		$template = $this->templateFactory->createTemplate(null, $this->templateClass);
-		$template->setFile($this->templateFile);
-		$template->setParameters($this->parameters);
 
-		return (string) $template;
+		return $template->renderToString($this->templateFile, $this->parameters);
 	}
 
 }
