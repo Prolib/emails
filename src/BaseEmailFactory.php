@@ -31,9 +31,9 @@ abstract class BaseEmailFactory
 		$this->emailSenders = $emailSenders;
 	}
 
-	protected function create(string $templateFile, ?string $templateClass = null): Email
+	protected function create(string $templateFile, ?object $templateObject = null): Email
 	{
-		return new Email($this->templateFactory, $this->mailer, $templateFile, $templateClass, $this->emailSenders);
+		return new Email($this->templateFactory, $this->mailer, $templateFile, $templateObject, $this->emailSenders);
 	}
 
 }

@@ -21,12 +21,9 @@ final class Email
 
 	private EmailSenders $emailSenders;
 
-	/** @var mixed[] */
-	private array $parameters = [];
-
 	private string $templateFile;
 
-	private ?string $templateClass;
+	private ?object $templateObject;
 
 	private ?string $basePath;
 
@@ -34,7 +31,7 @@ final class Email
 		ITemplateFactory $templateFactory,
 		IMailer $mailer,
 		string $templateFile,
-		?string $templateClass,
+		?object $templateObject,
 		EmailSenders $emailSenders
 	)
 	{
@@ -43,7 +40,7 @@ final class Email
 		$this->message = new Message();
 		$this->emailSenders = $emailSenders;
 		$this->templateFile = $templateFile;
-		$this->templateClass = $templateClass;
+		$this->templateObject = $templateObject;
 
 		if ($this->emailSenders->hasSender()) {
 			$this->setModule(EmailSenders::DEFAULT_MODULE);
@@ -62,20 +59,6 @@ final class Email
 	public function setSubject(string $subject): self
 	{
 		$this->message->setSubject($subject);
-
-		return $this;
-	}
-
-	public function setParameters(array $parameters): self
-	{
-		$this->parameters = $parameters;
-
-		return $this;
-	}
-
-	public function addParameter(string $name, $value): self
-	{
-		$this->parameters[$name] = $value;
 
 		return $this;
 	}
@@ -109,9 +92,9 @@ final class Email
 	private function getTemplate(): string
 	{
 		/** @var Template $template */
-		$template = $this->templateFactory->createTemplate(null, $this->templateClass);
+		$template = $this->templateFactory->createTemplate();
 
-		return $template->renderToString($this->templateFile, $this->parameters);
+		return $template->getLatte()->renderToString($this->templateFile, $this->templateObject ?? []);
 	}
 
 }
